@@ -1,0 +1,21 @@
+TASK-0
+--------------------------------------
+The main operation being performed in this task is array lookup, and the complexity is O(1)
+
+TASK-1:
+-------------------------------------
+There are two for loops in this task. The first loop is dependent on the size of `texts.csv`, which has a complexity of O(n). Similarly, the second loop, which is dependent on the size of `calls.csv`, has a complexity of O(n). There are minor operations such as adding element to a set, which is done in a constant operation. Overall the algorithm will have 2*O(n), which will be a linear complexity.
+
+TASK-2
+---------------------------------------
+The complexity of this task is O(n). There are two for loops that primarily contribute to the complexity---first one is to compute call duration for each phone and add it to a dictionary. Second one is to iterate through the dictionary that contains the phone numbers and their duration, and return the one that has longest duration. Both these loops goes through the size of the `calls.txt`. Overall the task will be linear complexity. 
+
+
+TASK-3
+--------------------------------------
+In this task, the functions getAreaCodesCalledByPplFromBanglore and getfixed2fixedRaitioInBanglore have linear complexity since both are iterating through the input `calls.txt` file. And, when displaying the area codes, there is a sorting operations. Python uses Tiemsort that has a complexity of O(nlogn). The total operations in this task will be 2*O(n) + O(nlogn), which will roughly be O(nlogn). This indicates that the maximum bound of the task is determined by the complexity of the sorting algorithm.
+
+
+TASK-4
+--------------------------------------
+The complexity of the function setOfTelemarketers is linear because the function has three for loops that are dependent on the size of `calls.txt` and `texts.txt`. Specifically speaking, each of the for loops is linear, i.e. O(n). And the overall function is also linear, which is 3*O(n). The task uses sorted() method in order to display the numbers. Since Python uses Timesort algorithm that has a complexity of O(nlogn), the total complexity of task 4 is O(nlogn) + 3*O(n), which will roughly be O(nlogn). Similar to task3, the complexity of this task has upper bound of the complexity of the sorting algorithm used.
