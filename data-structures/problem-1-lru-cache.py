@@ -1,30 +1,32 @@
 class LRU_Cache(object):
     def __init__(self, capacity):
         # Initialize class variables
-        self.bucket_array = [None] * capacity
+        self.bucket_array = [None] * (capacity + 1)
         self.num_of_elements = 0
         self.queue = []
     def get(self, key):
         # Retrieve item from provided key. Return -1 if nonexistent. 
         if key > len(self.bucket_array):
             return -1
-        if self.bucket_array[key%len(self.bucket_array)] != None:
+        if self.bucket_array[key] != None:
             self.num_of_elements -=1 
             if self.queue[0] == key: 
                 self.queue.append(self.queue.pop(0))
-            return self.bucket_array[key%len(self.bucket_array)]
+            return self.bucket_array[key]
         else:#collision
             return -1
 
     def set(self, key, value):
         # Set the value if the key is not present in the cache. If the cache is at capacity remove the oldest item. 
-        if self.bucket_array[key%len(self.bucket_array)] == None:
-            self.bucket_array[key%len(self.bucket_array)] = value
+        if key < len(self.bucket_array) and  self.bucket_array[key] == None:
+            self.bucket_array[key] = value
             self.num_of_elements += 1
             self.queue.append(key)
         else:#cache full
             oldest = self.queue.pop(0)
-            self.bucket_array[oldest%len(self.bucket_array)] = None
+            self.bucket_array[oldest] = None
+            self.bucket_array.extend([None])
+            self.bucket_array[key] = value
 cache = LRU_Cache(5)
 
 cache.set(1, 1);
