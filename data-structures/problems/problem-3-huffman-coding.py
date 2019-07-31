@@ -1,7 +1,7 @@
 import sys
 import operator
 from collections import deque
-
+from collections import Counter
 class Node(object):
     
     def __init__(self, freq = None, char = None):
@@ -87,7 +87,7 @@ class Stack:
                 s += "\n_________________\n<top here>"
                 return s
         else:
-            return "<queue is empty>"
+            return "<Stack is empty>"
 
 
 class Queue():
@@ -140,6 +140,12 @@ def _node_specific_get_right_child(node):
         return node.get_right_child()
     elif type(node).__name__ == 'Tree':
         return node.get_root().get_right_child()
+def compare_by_char(node, new_node):
+    if _node_specific_char(new_node) == _node_specific_char(node):
+        return 0
+    else:
+        return -1
+ 
 class Tree():
     def __init__(self):
         self.root = None
@@ -149,16 +155,16 @@ class Tree():
     
     def get_root(self):
         return self.root
-    
+   
     def compare(self,node, new_node):
         """
             0 means new_node equals node
             -1 means new node less than existing node
             1 means new node greater than existing node
             """
-        if _node_specific_freq(new_node) == None:
-            return -1
         if _node_specific_freq(new_node) == _node_specific_freq(node):
+#compare chars as well
+            #return compare_by_char(node, new_node) 
             return 0
         elif _node_specific_freq(new_node) < _node_specific_freq(node):
             return -1
@@ -194,9 +200,9 @@ class Tree():
                     break # inserted node, so stop looping
     
     
-    def search(self,value):
+    def search(self,char,freq):
         node = self.get_root()
-        s_node = Node(freq=None, char=value)
+        s_node = Node(freq, char)
         while(True):
             comparison = self.compare(node,s_node)
             if comparison == 0:
@@ -207,8 +213,8 @@ class Tree():
                 else:
                     return False
             else:
-                if node.has_right_child():
-                    node = node.get_right_child()
+                if _node_specific_has_right_child(node):#.has_right_child():
+                    node = _node_specific_get_right_child(node)#.get_right_child()
                 else:
                     return False
     def __repr__(self):
@@ -245,33 +251,80 @@ class Tree():
 
 
         return s
-def pre_order(tree):
+
+class State(object):
+    def __init__(self,node):
+        self.node = node
+        self.visited_left = False
+        self.visited_right = False
     
+    def get_node(self):
+        return self.node
+    
+    def get_visited_left(self):
+        return self.visited_left
+    
+    def get_visited_right(self):
+        return self.visited_right
+    
+    def set_visited_left(self):
+        self.visited_left = True
+    
+    def set_visited_right(self):
+        self.visited_right = True
+def convert(list): 
+       
+# Converting integer list to string list 
+# and joining the list using join() 
+    res = str("".join(map(str, list))) 
+                             
+    return res 
+                              
+def pre_order_with_stack(tree, debug_mode=False):
     visit_order = list()
-    
-    def traverse(node):
-        if node:
-            # visit the node
-            if _node_specific_char(node) == None:
-                visit_order.append('None' + ':' + str(_node_specific_freq(node)))
+    stack = Stack()
+    stack_of_codes = Stack()
+    node = tree.get_root()
+    #visit_order.append(node.get_value())
+    visit_order.append(str(_node_specific_char(node)) + ':' +str(_node_specific_freq(node)))
+    state = State(node)
+    stack.push(state)
+    codes = {} 
+    while(node):
+        if _node_specific_has_left_child(node) and not state.get_visited_left():
+            state.set_visited_left()
+            node = _node_specific_get_left_child(node)
+            visit_order.append(str(_node_specific_char(node)) + ':' +str(_node_specific_freq(node)))
+            state = State(node)
+            stack.push(state)
+            stack_of_codes.push(0)
+        
+        elif _node_specific_has_right_child(node) and not state.get_visited_right():
+            state.set_visited_right()
+            node = _node_specific_get_right_child(node)
+            #visit_order.append(_node_specific_char(node))
+            visit_order.append(str(_node_specific_char(node)) + ':' +str(_node_specific_freq(node)))
+            state = State(node)
+            stack.push(state)
+            stack_of_codes.push(1)
+        
+        else:
+            #make tempory copy
+            tmp = []
+            while not stack_of_codes.is_empty():
+                tmp.append(stack_of_codes.pop())
+            codes[_node_specific_char(node)] = convert(list(reversed(tmp)))
+            for i in range(len(tmp)-1, 0, -1):
+                stack_of_codes.push(tmp[i])
+#do normal stuff for traversing
+            stack.pop()
+            if not stack.is_empty():
+                state = stack.top()
+                node = state.get_node()
             else:
-                visit_order.append(_node_specific_char(node) + ':' + str(_node_specific_freq(node)))
-            
-            # traverse left subtree
-            if type(node).__name__ == 'Node':
-                traverse(node.get_left_child())
-            else:
-                traverse(node.get_root().get_left_child())
-            
-            # traverse right subtree
-            if type(node).__name__ == 'Node':
-                traverse(node.get_right_child())
-            else:
-                traverse(node.get_root().get_right_child())
-    
-    traverse(tree.get_root())
-    
-    return visit_order
+                node = None
+
+    return visit_order, codes
 
 def _node_specific_freq(node):
     if type(node).__name__ == 'Tree':
@@ -283,16 +336,22 @@ def _node_specific_char(node):
         return node.get_root().get_char()
     elif type(node).__name__ == 'Node':
         return node.get_char()
-def encode_data(string, tree):
+def encode_data(data, tree):
     '''
     tree: str to encode, uffman built tree
     return: encoded data, and tree
     '''
-    for char in list(string):
-        print(char, tree.search(char))
-    root = tree.get_root()
+    data = data.lower().replace(' ', '|')
+    data_freq = Counter(data.lower().replace(' ', '|'))
+    visit_order, codes = pre_order_with_stack(tree)
+    print(visit_order)
+    for c in codes.keys():
+        print(c, codes[c])
 
+    return tree, [codes[i] for i in data]
 def huffman_encoding(data):
+    #lower case
+    data = data.lower()
     #replace white space by `|` separator
     data = data.replace(' ', '|')
     print(data)
@@ -304,7 +363,9 @@ def huffman_encoding(data):
         else:
             freq[char] = 1 
     #sort in descending order
-    sorted_freq = sorted(freq.items(), key=operator.itemgetter(1), reverse=True)
+    #sorted_freq = sorted(freq.items(), key=operator.itemgetter(1), reverse=True)
+#sorted by value then key
+    sorted_freq = sorted(freq.items(), key=lambda x: (x[1],x[0]), reverse=True)
     cnt = 0
     #build a tree
     s = Stack()
@@ -315,7 +376,6 @@ def huffman_encoding(data):
         if type(item).__name__ == 'Node':
             print(item.get_char(), item.get_freq())
     while s.num_elements > 1:
-        print('TOP: ', _node_specific_char(s.top()))
         a = s.pop() 
         b = s.pop()
         #create a tree
@@ -334,7 +394,7 @@ def huffman_encoding(data):
         #if type(top).__name__ == 'Node':
         if _node_specific_freq(top) != None and _node_specific_freq(top) >= t.get_root().get_freq():
             s.push(t)
-            print('pushing on top')
+            #print('pushing on top')
         else:#pop lighter nodes
             tmp_stack = []
             while _node_specific_freq(top) != None and  _node_specific_freq(top) < t.get_root().get_freq():
@@ -344,25 +404,20 @@ def huffman_encoding(data):
                 if _node_specific_freq(top) == None:
                     break
             s.push(t)
-            print('size of lighter nodes: ', len(tmp_stack))
+            #print('size of lighter nodes: ', len(tmp_stack))
             for tt in list(reversed(tmp_stack)): 
                 s.push(tt)
-        ######################print
-        print('-'*50)
-        print('TOP: ', _node_specific_char(s.top()), _node_specific_freq(s.top()) )
-        num = 0
-        for item in s.arr:
-            if type(item).__name__ == 'Node':
-                print('n: ', item.get_char(), item.get_freq())
-            elif type(item).__name__ == 'Tree':
-                print('tree: ', pre_order(item))
-                #print(item.get_root().get_char(), item.get_root().get_freq(), item.get_root().get_left_child().get_char(), item.get_root().get_right_child().get_char()) 
-            num += 1
-            if num == s.num_elements:
-                break
-        cnt += 1
-        print('size of stack: ', s.num_elements)
-    encode_data(data, s.top())
+        #break
+    #encode_data(data, s.top())
+    #get codes for each character
+    visit_order, codes = pre_order_with_stack(s.top())#s.top() is the tree
+    print(visit_order)
+    for c in codes.keys():
+        print(c, codes[c])
+
+    return convert([codes[i] for i in data]), s.top()
+
+
 def huffman_decoding(data,tree):
     pass
 
@@ -374,12 +429,13 @@ if __name__ == "__main__":
     print ("The size of the data is: {}\n".format(sys.getsizeof(a_great_sentence)))
     print ("The content of the data is: {}\n".format(a_great_sentence))
     
-    huffman_encoding(a_great_sentence)
-    '''encoded_data, tree = huffman_encoding(a_great_sentence)
-
+    #huffman_encoding(a_great_sentence)
+    encoded_data, tree = huffman_encoding(a_great_sentence)
+    print('en: ', encoded_data)
+    
     print ("The size of the encoded data is: {}\n".format(sys.getsizeof(int(encoded_data, base=2))))
     print ("The content of the encoded data is: {}\n".format(encoded_data))
-    
+    ''' 
     decoded_data = huffman_decoding(encoded_data, tree)
     print ("The size of the decoded data is: {}\n".format(sys.getsizeof(decoded_data)))
     print ("The content of the encoded data is: {}\n".format(decoded_data))'''
