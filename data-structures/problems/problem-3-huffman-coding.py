@@ -415,12 +415,25 @@ def huffman_encoding(data):
     for c in codes.keys():
         print(c, codes[c])
 
-    return convert([codes[i] for i in data]), s.top()
+    #return convert([codes[i] for i in data]), s.top()
+    return convert([codes[i] for i in data]), [codes[i] for i in data], s.top()
 
-
-def huffman_decoding(data,tree):
-    pass
-
+def huffman_decoding(encoded_data, tree):
+    decoded_data = []
+    for code in encoded_data:
+        node = tree.get_root()
+        while node:
+            for c in code:
+                if c == '0':
+                    node =  _node_specific_get_left_child(node) 
+                elif c == '1':
+                    node = _node_specific_get_right_child(node)
+                else:
+                   print('ERROR')
+                   sys.exit(0) 
+                if  _node_specific_char(node) != None:
+                    decoded_data.append(_node_specific_char(node))
+    return ''.join(decoded_data).replace('|', ' ')
 if __name__ == "__main__":
     codes = {}
 
@@ -430,12 +443,12 @@ if __name__ == "__main__":
     print ("The content of the data is: {}\n".format(a_great_sentence))
     
     #huffman_encoding(a_great_sentence)
-    encoded_data, tree = huffman_encoding(a_great_sentence)
+    encoded_data, encoded_data_lst, tree = huffman_encoding(a_great_sentence)
     print('en: ', encoded_data)
     
     print ("The size of the encoded data is: {}\n".format(sys.getsizeof(int(encoded_data, base=2))))
     print ("The content of the encoded data is: {}\n".format(encoded_data))
-    ''' 
-    decoded_data = huffman_decoding(encoded_data, tree)
+     
+    decoded_data = huffman_decoding(encoded_data_lst, tree)
     print ("The size of the decoded data is: {}\n".format(sys.getsizeof(decoded_data)))
-    print ("The content of the encoded data is: {}\n".format(decoded_data))'''
+    print ("The content of the encoded data is: {}\n".format(decoded_data))
