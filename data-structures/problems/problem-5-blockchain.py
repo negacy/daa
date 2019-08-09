@@ -1,4 +1,5 @@
 import hashlib
+import time
 
 class Block:
 
@@ -54,9 +55,9 @@ class DoublyLinkedList:
 
 
 b1 = DoublyLinkedList() 
-b1.append('13:12 4/2/2019', 'my first blockchain')
-b1.append('13:12 4/2/2019', 'second blockchain')
-b1.append('13:12 4/2/2019', 'third blockchain')
-b1.append('13:12 4/2/2019', 'forth blockchain')
+b1.append(time.strftime("%a, %d %b %Y %I:%M:%S %p %Z", time.gmtime()), 'my irst blockchain')
+b1.append(time.strftime("%a, %d %b %Y %I:%M:%S %p %Z", time.gmtime()), 'second blockchain')
+b1.append(time.strftime("%a, %d %b %Y %I:%M:%S %p %Z", time.gmtime()), 'third blockchain')
+b1.append(time.strftime("%a, %d %b %Y %I:%M:%S %p %Z", time.gmtime()), 'forth blockchain')
 print(b1)
 print('size: ', b1.size())
