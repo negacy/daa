@@ -1,2 +1,2 @@
-# Data strcutures and algorithms from Udacity
+# Data structures and algorithms from Udacity
 
